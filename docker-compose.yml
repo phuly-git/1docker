@@ -31,7 +31,7 @@ services:
       - ./mysql/mysql/:/var/lib/mysql/ 
 
     environment:
-      MYSQL_ROOT_PASSWORD: Oi#2tsbHaa 
+      MYSQL_ROOT_PASSWORD: editpass 
 
     networks:
       - ahv-network
