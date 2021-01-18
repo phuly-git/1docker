@@ -1,0 +1,74 @@
+version: "3.9"
+
+services:
+
+  chaproxy:
+    build: ./haproxy
+    volumes:
+      - ./haproxy/config/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg 
+    networks:
+      - ahv-network
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
+
+  phpfpm:
+    build: ./php_fpm
+    volumes:
+      - ./mommybaby_vn/mommybaby_vn:/home/mommybaby_vn/
+      - ./phpmyadmin/phpmyadmin:/home/phpmyadmin/
+      - ./php_fpm/config/php.ini:/usr/local/etc/php/php.ini
+
+    networks:
+      - ahv-network
+    restart: always
+
+  cmysql:
+    build: ./mysql
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./mysql/mysql/:/var/lib/mysql/ 
+
+    environment:
+      MYSQL_ROOT_PASSWORD: Oi#2tsbHaa 
+
+    networks:
+      - ahv-network
+    restart: always
+
+  phpmyadmin:
+    build: ./phpmyadmin
+    volumes:
+      - ./phpmyadmin/phpmyadmin:/home/phpmyadmin/
+      - ./phpmyadmin/ssl:/home/ssl/
+      - ./phpmyadmin/config/httpd.conf:/usr/local/apache2/conf/httpd.conf
+      - ./phpmyadmin/config/httpd-ssl.conf:/usr/local/apache2/conf/extra/httpd-ssl.conf
+    networks:
+      - ahv-network
+    ports:
+      - 8444:80
+      - 8443:443
+    restart: always
+
+  # domain mommybaby.vn
+  mommybabyvn:
+    build: ./mommybaby_vn
+    volumes:
+      - ./mommybaby_vn/mommybaby_vn:/home/mommybaby_vn/
+      - ./mommybaby_vn/ssl:/home/ssl/
+      - ./mommybaby_vn/config/httpd.conf:/usr/local/apache2/conf/httpd.conf
+      - ./mommybaby_vn/config/httpd-ssl.conf:/usr/local/apache2/conf/extra/httpd-ssl.conf
+    networks:
+      - ahv-network
+    # ports:
+    #   - 80:80
+    #   - 443:443
+    restart: always
+  
+
+
+#NETWORK
+networks:
+  ahv-network:
+    driver: bridge
