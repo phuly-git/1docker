@@ -1,13 +1,14 @@
-version: "3.9"
+version: "3.3"
 
 services:
 
-  chaproxy:
+  haproxy:
     build: ./haproxy
     volumes:
       - ./haproxy/config/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg 
     networks:
-      - ahv-network
+      ahv-network:
+        ipv4_address: 172.30.0.2
     ports:
       - 80:80
       - 443:443
@@ -16,12 +17,16 @@ services:
   phpfpm:
     build: ./php_fpm
     volumes:
-      - ./mommybaby_vn/mommybaby_vn:/home/mommybaby_vn/
       - ./phpmyadmin/phpmyadmin:/home/phpmyadmin/
       - ./php_fpm/config/php.ini:/usr/local/etc/php/php.ini
 
+      - ./aweb01/public_html:/home/aweb01/
+      - ./aweb02/public_html:/home/aweb02/
+      - ./aweb03/public_html:/home/aweb03/
+
     networks:
-      - ahv-network
+      ahv-network:
+        ipv4_address: 172.30.0.3
     restart: always
 
   cmysql:
@@ -31,11 +36,51 @@ services:
       - ./mysql/mysql/:/var/lib/mysql/ 
 
     environment:
-      MYSQL_ROOT_PASSWORD: editpass 
+      MYSQL_ROOT_PASSWORD: GStga8778HHagTYgaa
 
     networks:
-      - ahv-network
+      ahv-network:
+        ipv4_address: 172.30.0.4
     restart: always
+
+  aweb01:
+      build: ./aweb01
+      volumes:
+        - ./aweb01/public_html:/home/aweb01/
+        - ./aweb01/ssl:/home/ssl/
+        - ./aweb01/config/httpd.conf:/usr/local/apache2/conf/httpd.conf
+        - ./aweb01/config/httpd-ssl.conf:/usr/local/apache2/conf/extra/httpd-ssl.conf
+      networks:
+        ahv-network:
+          ipv4_address: 172.30.0.100
+
+      restart: always
+
+  aweb02:
+      build: ./aweb02
+      volumes:
+        - ./aweb02/public_html:/home/aweb02/
+        - ./aweb02/ssl:/home/ssl/
+        - ./aweb02/config/httpd.conf:/usr/local/apache2/conf/httpd.conf
+        - ./aweb02/config/httpd-ssl.conf:/usr/local/apache2/conf/extra/httpd-ssl.conf
+      networks:
+        ahv-network:
+          ipv4_address: 172.30.0.101
+
+      restart: always
+
+  aweb03:
+      build: ./aweb03
+      volumes:
+        - ./aweb03/public_html:/home/aweb03/
+        - ./aweb03/ssl:/home/ssl/
+        - ./aweb03/config/httpd.conf:/usr/local/apache2/conf/httpd.conf
+        - ./aweb03/config/httpd-ssl.conf:/usr/local/apache2/conf/extra/httpd-ssl.conf
+      networks:
+        ahv-network:
+          ipv4_address: 172.30.0.102
+
+      restart: always
 
   phpmyadmin:
     build: ./phpmyadmin
@@ -45,30 +90,18 @@ services:
       - ./phpmyadmin/config/httpd.conf:/usr/local/apache2/conf/httpd.conf
       - ./phpmyadmin/config/httpd-ssl.conf:/usr/local/apache2/conf/extra/httpd-ssl.conf
     networks:
-      - ahv-network
+      ahv-network:
+        ipv4_address: 172.30.0.5
     ports:
       - 8444:80
       - 8443:443
     restart: always
-
-  # domain mommybaby.vn
-  mommybabyvn:
-    build: ./mommybaby_vn
-    volumes:
-      - ./mommybaby_vn/mommybaby_vn:/home/mommybaby_vn/
-      - ./mommybaby_vn/ssl:/home/ssl/
-      - ./mommybaby_vn/config/httpd.conf:/usr/local/apache2/conf/httpd.conf
-      - ./mommybaby_vn/config/httpd-ssl.conf:/usr/local/apache2/conf/extra/httpd-ssl.conf
-    networks:
-      - ahv-network
-    # ports:
-    #   - 80:80
-    #   - 443:443
-    restart: always
-  
 
 
 #NETWORK
 networks:
   ahv-network:
     driver: bridge
+    ipam:
+      config:
+      - subnet: 172.30.0.0/16

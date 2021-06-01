@@ -1,0 +1,5 @@
+FROM httpd:latest
+
+WORKDIR /home/aweb03/
+
+CMD [ "httpd-foreground" ]
