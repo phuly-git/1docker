@@ -1,0 +1,5 @@
+chown -R www-data:www-data /home/ahv/1docker/aweb01/public_html
+
+cd /home/ahv/1docker/aweb01/public_html/
+find . -type d -exec chmod 755 {} \;  # Change directory permissions rwxr-xr-x
+find . -type f -exec chmod 644 {} \;  # Change file permissions rw-r--r--
